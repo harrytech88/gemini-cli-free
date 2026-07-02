@@ -2,6 +2,8 @@
  * @license
  * Copyright 2025 Google LLC
  * SPDX-License-Identifier: Apache-2.0
+ * 
+ * Modified by Harry Dau - 2026
  */
 
 import {
@@ -31,7 +33,8 @@ import { RecordingContentGenerator } from './recordingContentGenerator.js';
 import { getVersion, resolveModel } from '../../index.js';
 import type { LlmRole } from '../telemetry/llmRole.js';
 import { ModelMappingContentGenerator } from './modelMappingContentGenerator.js';
-import { getBackendModelMappings } from '../config/models.js';
+import { getBackendModelMappings, CCPA_AI_MODEL_MAPPINGS } from '../config/models.js';
+import { multiApiKeyManager } from './multiApiKeyManager.js';
 
 /**
  * Interface abstracting the core functionalities for generating content and counting tokens.
@@ -172,7 +175,11 @@ export async function createContentGeneratorConfig(
   }
 
   const geminiApiKey =
-    apiKey || getEnv('GEMINI_API_KEY') || (await loadApiKey()) || undefined;
+    apiKey ||
+    getEnv('GEMINI_API_KEY') ||
+    (await loadApiKey()) ||
+    multiApiKeyManager.getCurrentKey() ||
+    undefined;
   const googleApiKey = getEnv('GOOGLE_API_KEY') || undefined;
   const googleCloudProject =
     getEnv('GOOGLE_CLOUD_PROJECT') ||

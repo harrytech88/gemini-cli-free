@@ -2,6 +2,8 @@
  * @license
  * Copyright 2025 Google LLC
  * SPDX-License-Identifier: Apache-2.0
+ * 
+ * Modified by Harry Dau - 2026
  */
 
 import { isDevelopment } from '../utils/installationInfo.js';
@@ -25,6 +27,7 @@ import { bugCommand } from '../ui/commands/bugCommand.js';
 import { bugMemoryCommand } from '../ui/commands/bugMemoryCommand.js';
 import { chatCommand, debugCommand } from '../ui/commands/chatCommand.js';
 import { clearCommand } from '../ui/commands/clearCommand.js';
+import { configCommand } from '../ui/commands/configCommand.js';
 import { commandsCommand } from '../ui/commands/commandsCommand.js';
 import { compressCommand } from '../ui/commands/compressCommand.js';
 import { copyCommand } from '../ui/commands/copyCommand.js';
@@ -131,6 +134,7 @@ export class BuiltinCommandLoader implements ICommandLoader {
         subCommands: chatResumeSubCommands,
       },
       clearCommand,
+      configCommand,
       commandsCommand,
       compressCommand,
       copyCommand,

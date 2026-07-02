@@ -2,6 +2,8 @@
  * @license
  * Copyright 2025 Google LLC
  * SPDX-License-Identifier: Apache-2.0
+ * 
+ * Modified by Harry Dau - 2026
  */
 
 // DISCLAIMER: This is a copied version of https://github.com/googleapis/js-genai/blob/main/src/chats.ts with the intention of working around a key bug
@@ -19,6 +21,7 @@ import {
   type GenerateContentParameters,
   type FunctionCall,
 } from '@google/genai';
+import { AuthType } from './contentGenerator.js';
 export { AgentChatHistory, type HistoryTurn } from './agentChatHistory.js';
 import { AgentChatHistory, type HistoryTurn } from './agentChatHistory.js';
 
@@ -70,6 +73,8 @@ import {
 } from '../availability/policyHelpers.js';
 import { coreEvents } from '../utils/events.js';
 import type { AgentLoopContext } from '../config/agent-loop-context.js';
+import { multiApiKeyManager } from './multiApiKeyManager.js';
+import { debugLogger } from '../utils/debugLogger.js';
 
 export enum StreamEventType {
   /** A regular content chunk from the API. */
@@ -1093,7 +1098,30 @@ export class GeminiChat {
     const onPersistent429Callback = async (
       authType?: string,
       error?: unknown,
-    ) => handleFallback(this.context.config, lastModelToUse, authType, error);
+    ) => {
+      // Try to rotate key
+      const newKey = multiApiKeyManager.rotateKey();
+      if (newKey) {
+        debugLogger.warn(
+          '429 encountered, rotating to next API key. Refreshing ContentGenerator.',
+        );
+
+        const authTypes = new Set<string>(Object.values(AuthType));
+
+        const isAuthType = (val: string | undefined): val is AuthType => val !== undefined && authTypes.has(val);
+
+        if (isAuthType(authType)) {
+          await this.context.config.refreshAuth(authType, newKey);
+        }
+        return 'rotated'; // Signal to retry.ts that we have handled it (rotated key)
+      }
+      return handleFallback(
+        this.context.config,
+        lastModelToUse,
+        authType,
+        error,
+      );
+    };
 
     const onValidationRequiredCallback = async (
       validationError: ValidationRequiredError,

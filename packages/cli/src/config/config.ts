@@ -2,6 +2,8 @@
  * @license
  * Copyright 2025 Google LLC
  * SPDX-License-Identifier: Apache-2.0
+ * 
+ * Modified by Harry Dau - 2026
  */
 
 import yargs from 'yargs';
@@ -14,6 +16,7 @@ import { extensionsCommand } from '../commands/extensions.js';
 import { skillsCommand } from '../commands/skills.js';
 import { hooksCommand } from '../commands/hooks.js';
 import { gemmaCommand } from '../commands/gemma.js';
+import { configCommand } from '../commands/config.js';
 import {
   setGeminiMdFilename as setServerGeminiMdFilename,
   resetGeminiMdFilename,
@@ -187,6 +190,7 @@ export async function parseArguments(
         skillsCommand,
         hooksCommand,
         gemmaCommand,
+        configCommand,
       ];
 
       const subcommands = commandModules.flatMap((mod) => {

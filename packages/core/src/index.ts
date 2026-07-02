@@ -2,6 +2,8 @@
  * @license
  * Copyright 2025 Google LLC
  * SPDX-License-Identifier: Apache-2.0
+ * 
+ * Modified by Harry Dau - 2026
  */
 
 // Export config
@@ -30,6 +32,7 @@ export * from './commands/extensions.js';
 export * from './commands/restore.js';
 export * from './commands/init.js';
 export * from './commands/memory.js';
+export * from './commands/config.js';
 export * from './commands/types.js';
 
 // Export Core Logic
