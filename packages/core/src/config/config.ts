@@ -2,6 +2,8 @@
  * @license
  * Copyright 2026 Google LLC
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * Modified by Harry Dau - 2026
  */
 
 import * as fs from 'node:fs';
@@ -135,6 +137,7 @@ import {
   type ModelConfigServiceConfig,
 } from '../services/modelConfigService.js';
 import { DEFAULT_MODEL_CONFIGS } from './defaultModelConfigs.js';
+import type { ProviderConfig } from '../core/chatClientFactory.js';
 import { MemoryContextManager } from '../context/memoryContextManager.js';
 import { TrackerService } from '../services/trackerService.js';
 import type { GenerateContentParameters } from '@google/genai';
@@ -1987,6 +1990,33 @@ export class Config implements McpContext, AgentLoopContext {
     if (this._activeModel !== model) {
       this._activeModel = model;
     }
+  }
+
+  getModelDefinition(modelId: string) {
+    return this.modelConfigService.getModelDefinition(modelId);
+  }
+
+  getActiveModelProvider(): ProviderConfig {
+    const activeModel = this.getActiveModel();
+    const modelDef = this.modelConfigService.getModelDefinition(activeModel);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+    const providerType = (modelDef?.provider ??
+      'gemini') as ProviderConfig['type'];
+    const apiKeyEnvVar = modelDef?.apiKeyEnvVar ?? 'GEMINI_API_KEY';
+    const apiKey =
+      providerType === 'gemini'
+        ? (process.env[apiKeyEnvVar] ?? '')
+        : (process.env[apiKeyEnvVar] ?? '');
+    return {
+      type: providerType,
+      apiKey,
+      baseUrl: modelDef?.baseUrl,
+      modelName: activeModel,
+    };
+  }
+
+  resolveApiKey(envVar?: string): string {
+    return envVar ? (process.env[envVar] ?? '') : '';
   }
 
   setFallbackModelHandler(handler: FallbackModelHandler): void {

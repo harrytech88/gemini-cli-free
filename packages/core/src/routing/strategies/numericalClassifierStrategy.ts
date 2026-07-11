@@ -2,6 +2,8 @@
  * @license
  * Copyright 2025 Google LLC
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * Modified by Harry Dau - 2026
  */
 
 import { z } from 'zod';
@@ -211,8 +213,13 @@ export class NumericalClassifierStrategy implements RoutingStrategy {
 
       const latencyMs = Date.now() - startTime;
 
+      const modelDef = config
+        .getModelConfigService()
+        .getModelDefinition(selectedModel);
       return {
         model: selectedModel,
+        provider: modelDef?.provider ?? 'gemini',
+        baseUrl: modelDef?.baseUrl,
         metadata: {
           source: `NumericalClassifier (${groupLabel})`,
           latencyMs,

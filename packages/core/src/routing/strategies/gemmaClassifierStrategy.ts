@@ -2,6 +2,8 @@
  * @license
  * Copyright 2026 Google LLC
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * Modified by Harry Dau - 2026
  */
 
 import { z } from 'zod';
@@ -230,8 +232,13 @@ ${formattedHistory}
         useLatestFlashLite,
       );
 
+      const modelDef = config
+        .getModelConfigService()
+        .getModelDefinition(selectedModel);
       return {
         model: selectedModel,
+        provider: modelDef?.provider ?? 'gemini',
+        baseUrl: modelDef?.baseUrl,
         metadata: {
           source: 'GemmaClassifier',
           latencyMs,

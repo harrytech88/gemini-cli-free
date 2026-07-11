@@ -2,7 +2,7 @@
  * @license
  * Copyright 2025 Google LLC
  * SPDX-License-Identifier: Apache-2.0
- * 
+ *
  * Modified by Harry Dau - 2026
  */
 
@@ -38,15 +38,19 @@ export * from './commands/types.js';
 // Export Core Logic
 export * from './core/baseLlmClient.js';
 export * from './core/client.js';
+export * from './core/chatClient.js';
+export * from './core/chatClientFactory.js';
+export * from './core/geminiChatAdapter.js';
+export * from './core/geminiChat.js';
 export * from './core/contentGenerator.js';
 export * from './core/fakeContentGenerator.js';
 export * from './core/loggingContentGenerator.js';
-export * from './core/geminiChat.js';
 export * from './core/logger.js';
 export * from './core/prompts.js';
 export * from './core/tokenLimits.js';
 export * from './core/turn.js';
 export * from './core/geminiRequest.js';
+export * from './core/sseParser.js';
 export * from './scheduler/scheduler.js';
 export * from './scheduler/types.js';
 export * from './scheduler/tool-executor.js';

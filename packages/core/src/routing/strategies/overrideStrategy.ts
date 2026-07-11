@@ -2,6 +2,8 @@
  * @license
  * Copyright 2025 Google LLC
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * Modified by Harry Dau - 2026
  */
 
 import type { Config } from '../../config/config.js';
@@ -33,17 +35,22 @@ export class OverrideStrategy implements RoutingStrategy {
       return null;
     }
 
-    // Return the overridden model name.
+    const resolvedModel = resolveModel(
+      overrideModel,
+      config.getGemini31LaunchedSync?.() ?? false,
+      false,
+      config.getHasAccessToPreviewModel?.() ?? true,
+      config,
+      config.hasLatestFlashGAAccess?.() ?? false,
+      config.hasLatestFlashLiteGAAccess?.() ?? false,
+    );
+    const modelDef = config
+      .getModelConfigService()
+      .getModelDefinition(resolvedModel);
     return {
-      model: resolveModel(
-        overrideModel,
-        config.getGemini31LaunchedSync?.() ?? false,
-        false,
-        config.getHasAccessToPreviewModel?.() ?? true,
-        config,
-        config.hasLatestFlashGAAccess?.() ?? false,
-        config.hasLatestFlashLiteGAAccess?.() ?? false,
-      ),
+      model: resolvedModel,
+      provider: modelDef?.provider ?? 'gemini',
+      baseUrl: modelDef?.baseUrl,
       metadata: {
         source: this.name,
         latencyMs: 0,

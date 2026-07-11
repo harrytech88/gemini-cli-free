@@ -2,6 +2,8 @@
  * @license
  * Copyright 2025 Google LLC
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * Modified by Harry Dau - 2026
  */
 
 import {
@@ -29,7 +31,12 @@ import { type AgentLoopContext } from '../config/agent-loop-context.js';
 import { getCoreSystemPrompt } from './prompts.js';
 import { checkNextSpeaker } from '../utils/nextSpeakerChecker.js';
 import { reportError } from '../utils/errorReporting.js';
-import { GeminiChat } from './geminiChat.js';
+import type { GeminiChat } from './geminiChat.js';
+import type { ProviderConfig } from './chatClientFactory.js';
+import { ChatClientFactory } from './chatClientFactory.js';
+import { GeminiChatAdapter } from './geminiChatAdapter.js';
+import type { ChatClient } from './chatClient.js';
+import { ChatClientTurn } from './chatClientTurn.js';
 import {
   retryWithBackoff,
   type RetryAvailabilityContext,
@@ -92,6 +99,7 @@ type BeforeAgentHookReturn =
 
 export class GeminiClient {
   private chat?: GeminiChat;
+  private chatClient?: ChatClient;
   private sessionTurnCount = 0;
 
   private readonly loopDetector: LoopDetectionService;
@@ -222,7 +230,7 @@ export class GeminiClient {
   private async fireAfterAgentHookSafe(
     currentRequest: PartListUnion,
     prompt_id: string,
-    turn?: Turn,
+    turn?: Turn | ChatClientTurn,
     stopHookActive: boolean = false,
   ): Promise<DefaultHookOutput | undefined> {
     const hookState = this.hookStateMap.get(prompt_id);
@@ -261,7 +269,8 @@ export class GeminiClient {
   }
 
   async initialize() {
-    this.chat = await this.startChat();
+    const adapter = await this.startChat();
+    this.chat = adapter.inner;
     this.updateTelemetryTokenCount();
   }
 
@@ -320,7 +329,8 @@ export class GeminiClient {
   }
 
   async resetChat(): Promise<void> {
-    this.chat = await this.startChat();
+    const adapter = await this.startChat();
+    this.chat = adapter.inner;
     this.updateTelemetryTokenCount();
     // Reset JIT context loaded paths so subdirectory context can be
     // re-discovered in the new session.
@@ -394,7 +404,7 @@ export class GeminiClient {
   async startChat(
     extraHistory?: ReadonlyArray<Content | HistoryTurn>,
     resumedSessionData?: ResumedSessionData,
-  ): Promise<GeminiChat> {
+  ): Promise<GeminiChatAdapter> {
     this.forceFullIdeContext = true;
     this.hasFailedCompressionAttempt = false;
     this.lastUsedModelId = undefined;
@@ -408,36 +418,64 @@ export class GeminiClient {
     try {
       const systemMemory = this.config.getSystemInstructionMemory();
       const systemInstruction = getCoreSystemPrompt(this.config, systemMemory);
-      const chat = new GeminiChat(
-        this.config,
-        systemInstruction,
-        tools,
+      const provider: ProviderConfig = this.config.getActiveModelProvider();
+      const onModelChanged = async (modelId: string) => {
+        this.lastUsedModelId = modelId;
+        const toolRegistry = this.context.toolRegistry;
+        const toolDeclarations = toolRegistry.getFunctionDeclarations(modelId);
+        return [{ functionDeclarations: toolDeclarations }];
+      };
+      const chat = new GeminiChatAdapter(
+        this.context,
+        provider,
         [...history],
         resumedSessionData,
-        async (modelId: string) => {
-          this.lastUsedModelId = modelId;
-          const toolRegistry = this.context.toolRegistry;
-          const toolDeclarations =
-            toolRegistry.getFunctionDeclarations(modelId);
-          return [{ functionDeclarations: toolDeclarations }];
-        },
+        onModelChanged,
       );
+
+      // For non-Gemini providers, create a separate ChatClient for API calls
+      if (provider.type !== 'gemini') {
+        this.chatClient = ChatClientFactory.createClient(
+          provider,
+          this.context,
+        );
+        await this.chatClient.initialize(resumedSessionData, 'main');
+        this.chatClient.setSystemInstruction(systemInstruction);
+      } else {
+        this.chatClient = undefined;
+      }
+
+      chat.setSystemInstruction(systemInstruction);
+      chat.inner.setTools(tools);
+
+      const geminiChat = chat.inner;
       await chat.initialize(resumedSessionData, 'main');
       this.contextManager = await initializeContextManager(
         this.config,
-        chat,
+        geminiChat,
         this.lastPromptId,
       );
       return chat;
     } catch (error) {
       await reportError(
         error,
-        'Error initializing Gemini chat session.',
+        'Error initializing chat session.',
         [...history],
         'startChat',
       );
       throw new Error(`Failed to initialize chat: ${getErrorMessage(error)}`);
     }
+  }
+
+  private createTurn(prompt_id: string): Turn | ChatClientTurn {
+    if (this.chatClient) {
+      return new ChatClientTurn(
+        this.chatClient,
+        prompt_id,
+        this.context.toolRegistry,
+      );
+    }
+    return new Turn(this.getChat(), prompt_id);
   }
 
   private getIdeContextParts(forceFullContext: boolean): {
@@ -631,9 +669,9 @@ export class GeminiClient {
     prompt_id: string,
     boundedTurns: number,
     displayContent?: PartListUnion,
-  ): AsyncGenerator<ServerGeminiStreamEvent, Turn> {
+  ): AsyncGenerator<ServerGeminiStreamEvent, Turn | ChatClientTurn> {
     // Re-initialize turn (it was empty before if in loop, or new instance)
-    let turn = new Turn(this.getChat(), prompt_id);
+    let turn = this.createTurn(prompt_id);
 
     this.sessionTurnCount++;
     if (
@@ -756,7 +794,7 @@ export class GeminiClient {
     }
 
     // Re-initialize turn with fresh history
-    turn = new Turn(this.getChat(), prompt_id);
+    turn = this.createTurn(prompt_id);
 
     const loopResult = await this.loopDetector.turnStarted(signal);
     if (loopResult.count > 1) {
@@ -928,7 +966,7 @@ export class GeminiClient {
     turns: number = MAX_TURNS,
     displayContent?: PartListUnion,
     stopHookActive: boolean = false,
-  ): AsyncGenerator<ServerGeminiStreamEvent, Turn> {
+  ): AsyncGenerator<ServerGeminiStreamEvent, Turn | ChatClientTurn> {
     this.config.resetTurn();
 
     const hooksEnabled = this.config.getEnableHooks();
@@ -951,13 +989,13 @@ export class GeminiClient {
           // Add user message to history before returning so it's kept in the transcript
           this.getChat().addHistory(createUserContent(request));
           yield hookResult;
-          return new Turn(this.getChat(), prompt_id);
+          return this.createTurn(prompt_id);
         } else if (
           'type' in hookResult &&
           hookResult.type === GeminiEventType.AgentExecutionBlocked
         ) {
           yield hookResult;
-          return new Turn(this.getChat(), prompt_id);
+          return this.createTurn(prompt_id);
         } else if ('additionalContext' in hookResult) {
           const additionalContext = hookResult.additionalContext;
           if (additionalContext) {
@@ -972,7 +1010,7 @@ export class GeminiClient {
     }
 
     const boundedTurns = Math.min(turns, MAX_TURNS);
-    let turn = new Turn(this.getChat(), prompt_id);
+    let turn = this.createTurn(prompt_id);
     let continuationHandled = false;
 
     try {
@@ -1247,7 +1285,8 @@ export class GeminiClient {
           resumedData = { conversation, filePath };
         }
 
-        this.chat = await this.startChat(newHistory, resumedData);
+        const adapter = await this.startChat(newHistory, resumedData);
+        this.chat = adapter.inner;
         this.updateTelemetryTokenCount();
         this.forceFullIdeContext = true;
       }
@@ -1287,7 +1326,7 @@ export class GeminiClient {
     prompt_id: string,
     boundedTurns: number,
     displayContent?: PartListUnion,
-  ): AsyncGenerator<ServerGeminiStreamEvent, Turn> {
+  ): AsyncGenerator<ServerGeminiStreamEvent, Turn | ChatClientTurn> {
     // Clear the detection flag so the recursive turn can proceed, but the count remains 1.
     this.loopDetector.clearDetection();
 

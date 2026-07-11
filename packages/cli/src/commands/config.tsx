@@ -1,3 +1,4 @@
+/* eslint-disable headers/header-format */
 /**
  * @license
  * Copyright 2026 Harry Dau
@@ -16,7 +17,8 @@ export const configCommand: CommandModule = {
   builder: (yargs) =>
     yargs
       .command('set-keys <keys...>', 'Set API keys', {}, async (argv) => {
-        const keys = argv['keys'] ?? [];
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+        const keys = (argv['keys'] ?? []) as string[];
         const result = await performSetKeys(keys);
         if (result.type === 'message') {
           process.stdout.write(result.content + '\n');

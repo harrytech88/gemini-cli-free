@@ -2,6 +2,8 @@
  * @license
  * Copyright 2025 Google LLC
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * Modified by Harry Dau - 2026
  */
 
 import { selectModelForAvailability } from '../../availability/policyHelpers.js';
@@ -47,8 +49,13 @@ export class FallbackStrategy implements RoutingStrategy {
       selection?.selectedModel &&
       selection.selectedModel !== requestedModel
     ) {
+      const modelDef = config
+        .getModelConfigService()
+        .getModelDefinition(selection.selectedModel);
       return {
         model: selection.selectedModel,
+        provider: modelDef?.provider ?? 'gemini',
+        baseUrl: modelDef?.baseUrl,
         metadata: {
           source: this.name,
           latencyMs: 0,

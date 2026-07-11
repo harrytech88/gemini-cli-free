@@ -2,6 +2,8 @@
  * @license
  * Copyright 2025 Google LLC
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * Modified by Harry Dau - 2026
  */
 
 import type { GenerateContentConfig } from '@google/genai';
@@ -68,6 +70,9 @@ export interface ModelDefinition {
   displayName?: string;
   tier?: string; // 'pro' | 'flash' | 'flash-lite' | 'custom' | 'auto'
   family?: string; // The gemini family, e.g. 'gemini-3' | 'gemini-2'
+  provider?: string; // Provider type: 'gemini' | 'openai' | 'anthropic' | 'openai-compatible'
+  apiKeyEnvVar?: string; // Environment variable for the API key
+  baseUrl?: string; // Base URL for the provider API
   isPreview?: boolean;
   // Specifies whether the model should be visible in the dialog.
   isVisible?: boolean;
@@ -238,6 +243,9 @@ export class ModelConfigService {
       return {
         tier: 'custom',
         family: 'custom',
+        provider: 'openai-compatible',
+        apiKeyEnvVar: 'OPENAI_COMPATIBLE_API_KEY',
+        baseUrl: process.env['OPENAI_COMPATIBLE_BASE_URL'],
         features: {},
       };
     }

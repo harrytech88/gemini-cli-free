@@ -2,6 +2,8 @@
  * @license
  * Copyright 2025 Google LLC
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * Modified by Harry Dau - 2026
  */
 
 import type { Config } from '../../config/config.js';
@@ -32,8 +34,13 @@ export class DefaultStrategy implements TerminalStrategy {
       config.hasLatestFlashGAAccess?.() ?? false,
       config.hasLatestFlashLiteGAAccess?.() ?? false,
     );
+    const modelDef = config
+      .getModelConfigService()
+      .getModelDefinition(defaultModel);
     return {
       model: defaultModel,
+      provider: modelDef?.provider ?? 'gemini',
+      baseUrl: modelDef?.baseUrl,
       metadata: {
         source: this.name,
         latencyMs: 0,

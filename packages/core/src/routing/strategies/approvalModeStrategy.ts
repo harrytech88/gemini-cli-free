@@ -2,6 +2,8 @@
  * @license
  * Copyright 2026 Google LLC
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * Modified by Harry Dau - 2026
  */
 
 import type { Config } from '../../config/config.js';
@@ -69,8 +71,13 @@ export class ApprovalModeStrategy implements RoutingStrategy {
         useLatestFlash,
         useLatestFlashLite,
       );
+      const proModelDef = config
+        .getModelConfigService()
+        .getModelDefinition(proModel);
       return {
         model: proModel,
+        provider: proModelDef?.provider ?? 'gemini',
+        baseUrl: proModelDef?.baseUrl,
         metadata: {
           source: this.name,
           latencyMs: Date.now() - startTime,
@@ -89,8 +96,13 @@ export class ApprovalModeStrategy implements RoutingStrategy {
         useLatestFlash,
         useLatestFlashLite,
       );
+      const flashModelDef = config
+        .getModelConfigService()
+        .getModelDefinition(flashModel);
       return {
         model: flashModel,
+        provider: flashModelDef?.provider ?? 'gemini',
+        baseUrl: flashModelDef?.baseUrl,
         metadata: {
           source: this.name,
           latencyMs: Date.now() - startTime,

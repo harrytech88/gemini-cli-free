@@ -2,6 +2,8 @@
  * @license
  * Copyright 2025 Google LLC
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * Modified by Harry Dau - 2026
  */
 
 import { ThinkingLevel } from '@google/genai';
@@ -345,6 +347,8 @@ export const DEFAULT_MODEL_CONFIGS: ModelConfigServiceConfig = {
     'gemini-3.1-flash-lite': {
       tier: 'flash-lite',
       family: 'gemini-3',
+      provider: 'gemini',
+      apiKeyEnvVar: 'GEMINI_API_KEY',
       isPreview: false,
       isVisible: true,
       features: { thinking: false, multimodalToolUse: true },
@@ -359,6 +363,8 @@ export const DEFAULT_MODEL_CONFIGS: ModelConfigServiceConfig = {
     'gemini-3.1-pro-preview': {
       tier: 'pro',
       family: 'gemini-3',
+      provider: 'gemini',
+      apiKeyEnvVar: 'GEMINI_API_KEY',
       isPreview: true,
       isVisible: true,
       features: { thinking: true, multimodalToolUse: true },
@@ -366,6 +372,8 @@ export const DEFAULT_MODEL_CONFIGS: ModelConfigServiceConfig = {
     'gemini-3.1-pro-preview-customtools': {
       tier: 'pro',
       family: 'gemini-3',
+      provider: 'gemini',
+      apiKeyEnvVar: 'GEMINI_API_KEY',
       isPreview: true,
       isVisible: false,
       features: { thinking: true, multimodalToolUse: true },
@@ -373,6 +381,8 @@ export const DEFAULT_MODEL_CONFIGS: ModelConfigServiceConfig = {
     'gemini-3-pro-preview': {
       tier: 'pro',
       family: 'gemini-3',
+      provider: 'gemini',
+      apiKeyEnvVar: 'GEMINI_API_KEY',
       isPreview: true,
       isVisible: true,
       features: { thinking: true, multimodalToolUse: true },
@@ -380,6 +390,8 @@ export const DEFAULT_MODEL_CONFIGS: ModelConfigServiceConfig = {
     'gemini-3-flash-preview': {
       tier: 'flash',
       family: 'gemini-3',
+      provider: 'gemini',
+      apiKeyEnvVar: 'GEMINI_API_KEY',
       isPreview: true,
       isVisible: true,
       features: { thinking: false, multimodalToolUse: true },
@@ -387,6 +399,8 @@ export const DEFAULT_MODEL_CONFIGS: ModelConfigServiceConfig = {
     'gemini-3.5-flash': {
       tier: 'flash',
       family: 'gemini-3',
+      provider: 'gemini',
+      apiKeyEnvVar: 'GEMINI_API_KEY',
       isPreview: false,
       isVisible: true,
       features: { thinking: false, multimodalToolUse: true },
@@ -401,6 +415,8 @@ export const DEFAULT_MODEL_CONFIGS: ModelConfigServiceConfig = {
     'gemini-2.5-pro': {
       tier: 'pro',
       family: 'gemini-2.5',
+      provider: 'gemini',
+      apiKeyEnvVar: 'GEMINI_API_KEY',
       isPreview: false,
       isVisible: true,
       features: { thinking: false, multimodalToolUse: false },
@@ -408,6 +424,8 @@ export const DEFAULT_MODEL_CONFIGS: ModelConfigServiceConfig = {
     'gemini-2.5-flash': {
       tier: 'flash',
       family: 'gemini-2.5',
+      provider: 'gemini',
+      apiKeyEnvVar: 'GEMINI_API_KEY',
       isPreview: false,
       isVisible: true,
       features: { thinking: false, multimodalToolUse: false },
@@ -415,6 +433,8 @@ export const DEFAULT_MODEL_CONFIGS: ModelConfigServiceConfig = {
     'gemini-2.5-flash-lite': {
       tier: 'flash-lite',
       family: 'gemini-2.5',
+      provider: 'gemini',
+      apiKeyEnvVar: 'GEMINI_API_KEY',
       isPreview: false,
       isVisible: true,
       features: { thinking: false, multimodalToolUse: false },
@@ -423,6 +443,8 @@ export const DEFAULT_MODEL_CONFIGS: ModelConfigServiceConfig = {
       displayName: 'gemma-4-31b-it',
       tier: 'custom',
       family: 'gemma-4',
+      provider: 'gemini',
+      apiKeyEnvVar: 'GEMINI_API_KEY',
       isPreview: false,
       isVisible: true,
       features: { thinking: true, multimodalToolUse: false },
@@ -431,6 +453,8 @@ export const DEFAULT_MODEL_CONFIGS: ModelConfigServiceConfig = {
       displayName: 'gemma-4-26b-a4b-it',
       tier: 'custom',
       family: 'gemma-4',
+      provider: 'gemini',
+      apiKeyEnvVar: 'GEMINI_API_KEY',
       isPreview: false,
       isVisible: true,
       features: { thinking: true, multimodalToolUse: false },
@@ -440,24 +464,32 @@ export const DEFAULT_MODEL_CONFIGS: ModelConfigServiceConfig = {
     auto: {
       displayName: 'Auto',
       tier: 'auto',
+      provider: 'gemini',
+      apiKeyEnvVar: 'GEMINI_API_KEY',
       isPreview: true,
       isVisible: true,
       features: { thinking: true, multimodalToolUse: false },
     },
     pro: {
       tier: 'pro',
+      provider: 'gemini',
+      apiKeyEnvVar: 'GEMINI_API_KEY',
       isPreview: false,
       isVisible: false,
       features: { thinking: true, multimodalToolUse: false },
     },
     flash: {
       tier: 'flash',
+      provider: 'gemini',
+      apiKeyEnvVar: 'GEMINI_API_KEY',
       isPreview: false,
       isVisible: false,
       features: { thinking: false, multimodalToolUse: false },
     },
     'flash-lite': {
       tier: 'flash-lite',
+      provider: 'gemini',
+      apiKeyEnvVar: 'GEMINI_API_KEY',
       isPreview: false,
       isVisible: false,
       features: { thinking: false, multimodalToolUse: false },
@@ -465,14 +497,111 @@ export const DEFAULT_MODEL_CONFIGS: ModelConfigServiceConfig = {
     'auto-gemini-3': {
       tier: 'auto',
       family: 'gemini-3',
+      provider: 'gemini',
+      apiKeyEnvVar: 'GEMINI_API_KEY',
       isPreview: true,
       isVisible: false,
     },
     'auto-gemini-2.5': {
       tier: 'auto',
       family: 'gemini-2.5',
+      provider: 'gemini',
+      apiKeyEnvVar: 'GEMINI_API_KEY',
       isPreview: false,
       isVisible: false,
+    },
+
+    // OpenAI Models
+    'gpt-4o': {
+      displayName: 'GPT-4o',
+      tier: 'pro',
+      family: 'openai',
+      provider: 'openai',
+      apiKeyEnvVar: 'OPENAI_API_KEY',
+      baseUrl: 'https://api.openai.com/v1',
+      isPreview: false,
+      isVisible: true,
+      features: { thinking: false, multimodalToolUse: false },
+    },
+    'gpt-4o-mini': {
+      displayName: 'GPT-4o Mini',
+      tier: 'flash',
+      family: 'openai',
+      provider: 'openai',
+      apiKeyEnvVar: 'OPENAI_API_KEY',
+      baseUrl: 'https://api.openai.com/v1',
+      isPreview: false,
+      isVisible: true,
+      features: { thinking: false, multimodalToolUse: false },
+    },
+    'gpt-4-turbo': {
+      displayName: 'GPT-4 Turbo',
+      tier: 'pro',
+      family: 'openai',
+      provider: 'openai',
+      apiKeyEnvVar: 'OPENAI_API_KEY',
+      baseUrl: 'https://api.openai.com/v1',
+      isPreview: false,
+      isVisible: true,
+      features: { thinking: false, multimodalToolUse: false },
+    },
+    'o3-mini': {
+      displayName: 'o3-mini',
+      tier: 'flash',
+      family: 'openai',
+      provider: 'openai',
+      apiKeyEnvVar: 'OPENAI_API_KEY',
+      baseUrl: 'https://api.openai.com/v1',
+      isPreview: false,
+      isVisible: true,
+      features: { thinking: false, multimodalToolUse: false },
+    },
+
+    // OpenAI-Compatible Models (Ollama, vLLM, etc.)
+    'ollama-llama3': {
+      displayName: 'Ollama Llama 3',
+      tier: 'flash',
+      family: 'openai-compatible',
+      provider: 'openai-compatible',
+      apiKeyEnvVar: '',
+      baseUrl: 'http://localhost:11434/v1',
+      isPreview: false,
+      isVisible: true,
+      features: { thinking: false, multimodalToolUse: false },
+    },
+    'ollama-llama3-8b': {
+      displayName: 'Ollama Llama 3 8B',
+      tier: 'flash-lite',
+      family: 'openai-compatible',
+      provider: 'openai-compatible',
+      apiKeyEnvVar: '',
+      baseUrl: 'http://localhost:11434/v1',
+      isPreview: false,
+      isVisible: true,
+      features: { thinking: false, multimodalToolUse: false },
+    },
+    'ollama-deepseek-r1': {
+      displayName: 'Ollama DeepSeek R1',
+      tier: 'pro',
+      family: 'openai-compatible',
+      provider: 'openai-compatible',
+      apiKeyEnvVar: '',
+      baseUrl: 'http://localhost:11434/v1',
+      isPreview: false,
+      isVisible: true,
+      features: { thinking: false, multimodalToolUse: false },
+    },
+    'openai-compatible-custom': {
+      displayName: 'Custom OpenAI-Compatible',
+      tier: 'custom',
+      family: 'openai-compatible',
+      provider: 'openai-compatible',
+      apiKeyEnvVar: 'OPENAI_COMPATIBLE_API_KEY',
+      baseUrl:
+        'https://ws-g8jl71kjgjnpvmzd.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1',
+      isPreview: false,
+      isVisible: true,
+      features: { thinking: false, multimodalToolUse: false },
     },
   },
   modelIdResolutions: {

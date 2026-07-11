@@ -2,6 +2,8 @@
  * @license
  * Copyright 2025 Google LLC
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * Modified by Harry Dau - 2026
  */
 
 import type { Content, PartListUnion } from '@google/genai';
@@ -15,6 +17,10 @@ import type { LocalLiteRtLmClient } from '../core/localLiteRtLmClient.js';
 export interface RoutingDecision {
   /** The model identifier string to use for the next API call (e.g., 'gemini-2.5-pro'). */
   model: string;
+  /** The provider type for the selected model (e.g., 'gemini', 'openai', 'anthropic'). */
+  provider?: string;
+  /** Optional base URL override for the provider API. */
+  baseUrl?: string;
   /**
    * Metadata about the routing decision for logging purposes.
    */

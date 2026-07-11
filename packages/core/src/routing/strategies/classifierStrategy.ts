@@ -2,6 +2,8 @@
  * @license
  * Copyright 2025 Google LLC
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * Modified by Harry Dau - 2026
  */
 
 import { z } from 'zod';
@@ -211,8 +213,13 @@ export class ClassifierStrategy implements RoutingStrategy {
         return null;
       }
 
+      const modelDef = config
+        .getModelConfigService()
+        .getModelDefinition(selectedModel);
       return {
         model: selectedModel,
+        provider: modelDef?.provider ?? 'gemini',
+        baseUrl: modelDef?.baseUrl,
         metadata: {
           source: 'Classifier',
           latencyMs,
