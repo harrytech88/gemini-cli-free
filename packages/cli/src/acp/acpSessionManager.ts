@@ -130,7 +130,7 @@ export class AcpSessionManager {
 
     const chat = geminiClient.isInitialized?.()
       ? geminiClient.getChat()
-      : await geminiClient.startChat();
+      : (await geminiClient.startChat()).inner;
 
     const session = new Session(
       sessionId,

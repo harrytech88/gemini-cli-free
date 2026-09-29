@@ -2,7 +2,7 @@
  * @license
  * Copyright 2025 Google LLC
  * SPDX-License-Identifier: Apache-2.0
- * 
+ *
  * Modified by Harry Dau - 2026
  */
 
@@ -33,7 +33,7 @@ import { RecordingContentGenerator } from './recordingContentGenerator.js';
 import { getVersion, resolveModel } from '../../index.js';
 import type { LlmRole } from '../telemetry/llmRole.js';
 import { ModelMappingContentGenerator } from './modelMappingContentGenerator.js';
-import { getBackendModelMappings, CCPA_AI_MODEL_MAPPINGS } from '../config/models.js';
+import { getBackendModelMappings } from '../config/models.js';
 import { multiApiKeyManager } from './multiApiKeyManager.js';
 
 /**

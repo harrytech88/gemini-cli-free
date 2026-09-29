@@ -364,7 +364,8 @@ export class GeminiClient {
         }
       }
     }
-    this.chat = await this.startChat(history, resumedSessionData);
+    const adapter = await this.startChat(history, resumedSessionData);
+    this.chat = adapter.inner;
     this.updateTelemetryTokenCount();
   }
 
